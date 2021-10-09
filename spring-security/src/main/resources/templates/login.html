@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>自定义登录</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div style="margin: 40px auto; width: 320px;">
+        <div th:text="${session.SPRING_SECURITY_LAST_EXCEPTION}"></div>
+        <form action="/login" method="post">
+            <div class="mb-3 row">
+                <label for="username" class="visually-hidden">用户名</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名">
+            </div>
+            <div class="mb-3 row">
+                <label for="password" class="visually-hidden">密码</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码">
+            </div>
+            <div class="mb-3 row">
+                <button type="submit" class="btn btn-primary mb-3">登录</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
