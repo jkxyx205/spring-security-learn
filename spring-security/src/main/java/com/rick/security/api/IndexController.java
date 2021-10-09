@@ -14,4 +14,14 @@ public class IndexController {
     public String index() {
         return "index";
     }
+
+    @GetMapping("public")
+    public String publicFun() {
+        return "public";
+    }
+
+    @GetMapping("admin")
+    public String admin() {
+        return "admin";
+    }
 }

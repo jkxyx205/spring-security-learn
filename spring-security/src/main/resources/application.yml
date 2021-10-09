@@ -1,0 +1,7 @@
+spring:
+  security:
+    user:
+      name: rick
+      password: $2a$10$Qs4BkX/ljq09QuYcE6GwBewe9aKIW9NlXvRFyqDurmZcyGcFzDXIq # 123456编码后的密码
+      roles:
+        - ADMIN
