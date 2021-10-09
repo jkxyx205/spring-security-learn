@@ -12,10 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.*;
 
 /**
  * @author Rick
@@ -73,17 +70,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        final LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint = new LoginUrlAuthenticationEntryPoint("/login");
+
         http.authorizeRequests((requests) -> requests.antMatchers("/public").permitAll()
                 .antMatchers(HttpMethod.GET, "/login").permitAll()
                 .antMatchers("/admin").hasAnyRole("ADMIN")
                 .anyRequest().authenticated())
+                .exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
+                log.warn("认证异常");
+                // 默认就是LoginUrlAuthenticationEntryPoint
+                loginUrlAuthenticationEntryPoint.commence(request, response, authException);
+        })
+                .and()
                 .exceptionHandling().accessDeniedHandler((request, response, accessDeniedException) -> {
-                    // 403 Forbidden 没有授权，执行到此处
+            // 403 Forbidden 没有授权，执行到此处
+            log.warn("已经认证，但是没有权限");
             HttpServletResponseUtils.write(response, "text/plain", "403 Forbidden");
         }).and().csrf().disable(); // csrf会拦截POST请求 https://www.jianshu.com/p/2c275c75c77a;
 
         final AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-        final AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler("/login");
+        final AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+
         http.formLogin()
                 // 登录页面的路径
                 .loginPage("/login")

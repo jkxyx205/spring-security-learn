@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+>
 <head>
     <meta charset="UTF-8">
     <title>自定义登录</title>
@@ -8,7 +8,9 @@
 </head>
 <body>
     <div style="margin: 40px auto; width: 320px;">
-        <div th:text="${session.SPRING_SECURITY_LAST_EXCEPTION}"></div>
+        <th:block th:if="${session.SPRING_SECURITY_LAST_EXCEPTION != null}">
+            <div th:text="${session.SPRING_SECURITY_LAST_EXCEPTION.message}"></div>
+        </th:block>
         <form action="/login" method="post">
             <div class="mb-3 row">
                 <label for="username" class="visually-hidden">用户名</label>
