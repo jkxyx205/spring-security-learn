@@ -11,6 +11,7 @@
         <th:block th:if="${session.SPRING_SECURITY_LAST_EXCEPTION != null}">
             <div th:text="${session.SPRING_SECURITY_LAST_EXCEPTION.message}"></div>
         </th:block>
+        <h1>用户名密码登录</h1>
         <form action="/login" method="post">
             <div class="mb-3 row">
                 <label for="username" class="visually-hidden">用户名</label>
@@ -19,6 +20,20 @@
             <div class="mb-3 row">
                 <label for="password" class="visually-hidden">密码</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码">
+            </div>
+            <div class="mb-3 row">
+                <button type="submit" class="btn btn-primary mb-3">登录</button>
+            </div>
+        </form>
+        <h1>手机验证码登录</h1>
+        <form action="/sms/login" method="post">
+            <div class="mb-3 row">
+                <label for="mobile" class="visually-hidden">用户名</label>
+                <input type="text" class="form-control" id="mobile" name="mobile" value="18898987724">
+            </div>
+            <div class="mb-3 row">
+                <label for="code" class="visually-hidden">手机验证码</label>
+                <input type="text" class="form-control" id="code" name="code" value="888888">
             </div>
             <div class="mb-3 row">
                 <button type="submit" class="btn btn-primary mb-3">登录</button>

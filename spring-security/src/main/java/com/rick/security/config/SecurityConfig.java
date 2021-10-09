@@ -1,6 +1,8 @@
 package com.rick.security.config;
 
 import com.rick.common.http.HttpServletResponseUtils;
+import com.rick.security.authentication.sms.SmsCodeAuthenticationFilter;
+import com.rick.security.authentication.sms.SmsCodeAuthenticationProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +12,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.*;
@@ -45,6 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .password(passwordEncoder.encode("123456"))
                 .roles("USER");
 
+        auth.authenticationProvider(new SmsCodeAuthenticationProvider(username -> new User("jkxyx205", "11", AuthorityUtils.commaSeparatedStringToAuthorityList("USER"))));
     }
 
 //    @Bean
@@ -73,7 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         final LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint = new LoginUrlAuthenticationEntryPoint("/login");
 
         http.authorizeRequests((requests) -> requests.antMatchers("/public").permitAll()
-                .antMatchers(HttpMethod.GET, "/login").permitAll()
+                .antMatchers(HttpMethod.GET, "/login","/sms/login").permitAll()
                 .antMatchers("/admin").hasAnyRole("ADMIN")
                 .anyRequest().authenticated())
                 .exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
@@ -111,7 +116,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     log.info("{} 退出登录", authentication.getName());
                     response.sendRedirect("/login");
                 });
+
         http.httpBasic();
+
+        http.addFilterBefore(new SmsCodeAuthenticationFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
