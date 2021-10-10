@@ -1,5 +1,6 @@
 package com.rick.security.api;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +24,11 @@ public class IndexController {
     @GetMapping("admin")
     public String admin() {
         return "admin";
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @GetMapping("user")
+    public String user() {
+        return "user";
     }
 }

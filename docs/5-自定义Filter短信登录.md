@@ -152,3 +152,8 @@ public class SmsCodeAuthenticationProvider implements AuthenticationProvider {
 </body>
 </html>
 ```
+# 启动日志
+```
+2021-10-10 12:41:07.188  INFO 54574 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4694f434, org.springframework.security.web.context.SecurityContextPersistenceFilter@ceddaf8, org.springframework.security.web.header.HeaderWriterFilter@5f174dd2, org.springframework.security.web.authentication.logout.LogoutFilter@608b1fd2, com.rick.security.authentication.sms.SmsCodeAuthenticationFilter@56928e17, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@6dc1dc69, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@4833eff3, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1db87583, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6993c8df, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@dd2856e, org.springframework.security.web.session.SessionManagementFilter@45aca496, org.springframework.security.web.access.ExceptionTranslationFilter@10a98392, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@70c69586]
+```
+`SmsCodeAuthenticationFilter` 已经添加到了 `DefaultSecurityFilterChain` 中

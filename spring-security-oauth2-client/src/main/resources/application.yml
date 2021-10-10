@@ -1,0 +1,16 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: 2fc27dbe786869f767ef
+            client-secret: 68fe2c24098e355598bd0eb90a953f444fbf22e4
+            authorization-grant-type: authorization_code
+            # /login/oauth2/code/ 固定格式
+            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+            scope: user, custome
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
