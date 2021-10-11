@@ -6,7 +6,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
 
-group 'com.rick.security.oauth2.client'
+group 'com.rick.security.oauth2.resourceserver'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -17,7 +17,7 @@ repositories {
 dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-    implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
+    implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     implementation 'com.rick.common:sharp-common:1.0-SNAPSHOT'

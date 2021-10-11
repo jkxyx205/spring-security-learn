@@ -1,3 +1,15 @@
+# 说明
+`spring-security-oauth` 这个项目不赞成使用了。oauth2已经由Spring Security提供服务。Spring Security没有提供对认证服务器的支持，需要 `spring-authorization-server` 去支持。
+[https://spring.io/blog/2020/04/15/announcing-the-spring-authorization-server](https://spring.io/blog/2020/04/15/announcing-the-spring-authorization-server)
+
+```
+The Spring Security OAuth project is deprecated. The latest OAuth 2.0 support is provided by Spring Security. See the OAuth 2.0 Migration Guide for further details.
+
+Since Spring Security doesn’t provide Authorization Server support, migrating a Spring Security OAuth Authorization Server see https://spring.io/blog/2020/04/15/announcing-the-spring-authorization-server
+```
+* [https://github.com/spring-projects/spring-security-oauth](https://github.com/spring-projects/spring-security-oauth)
+* [https://github.com/spring-projects/spring-security-oauth2-boot](https://github.com/spring-projects/spring-security-oauth2-boot)
+* [https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide](https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide)
 # 集成github第三方登录
 
 ## 添加依赖 `build.gradle`
