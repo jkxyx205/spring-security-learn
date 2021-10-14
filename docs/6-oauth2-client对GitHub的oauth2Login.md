@@ -15,8 +15,8 @@ Since Spring Security doesn’t provide Authorization Server support, migrating 
 ## 添加依赖 `build.gradle`
 
 ```
-    implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
+implementation 'org.springframework.boot:spring-boot-starter-web'
 ```
 
 ## 配置文件 `application.yml`
@@ -131,13 +131,13 @@ public class ResourceController {
 * `OAuth2AuthorizationRequestRedirectFilter.java`
 
 ```java
-    private void sendRedirectForAuthorization(HttpServletRequest request, HttpServletResponse response, OAuth2AuthorizationRequest authorizationRequest) throws IOException {
-        if (AuthorizationGrantType.AUTHORIZATION_CODE.equals(authorizationRequest.getGrantType())) {
-            this.authorizationRequestRepository.saveAuthorizationRequest(authorizationRequest, request, response);
-        }
-
-        this.authorizationRedirectStrategy.sendRedirect(request, response, authorizationRequest.getAuthorizationRequestUri());
+private void sendRedirectForAuthorization(HttpServletRequest request, HttpServletResponse response, OAuth2AuthorizationRequest authorizationRequest) throws IOException {
+    if (AuthorizationGrantType.AUTHORIZATION_CODE.equals(authorizationRequest.getGrantType())) {
+        this.authorizationRequestRepository.saveAuthorizationRequest(authorizationRequest, request, response);
     }
+
+    this.authorizationRedirectStrategy.sendRedirect(request, response, authorizationRequest.getAuthorizationRequestUri());
+}
 ```
 拦截器组装数据后跳转以下URL
 ```
@@ -147,39 +147,39 @@ https://github.com/login/oauth/authorize?response_type=code&client_id=&redirect_
 * `OAuth2LoginAuthenticationFilter.java`
 
 ```java
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        MultiValueMap<String, String> params = OAuth2AuthorizationResponseUtils.toMultiMap(request.getParameterMap());
-        if (!OAuth2AuthorizationResponseUtils.isAuthorizationResponse(params)) {
-            OAuth2Error oauth2Error = new OAuth2Error("invalid_request");
+public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    MultiValueMap<String, String> params = OAuth2AuthorizationResponseUtils.toMultiMap(request.getParameterMap());
+    if (!OAuth2AuthorizationResponseUtils.isAuthorizationResponse(params)) {
+        OAuth2Error oauth2Error = new OAuth2Error("invalid_request");
+        throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
+    } else {
+        OAuth2AuthorizationRequest authorizationRequest = this.authorizationRequestRepository.removeAuthorizationRequest(request, response);
+        if (authorizationRequest == null) {
+            OAuth2Error oauth2Error = new OAuth2Error("authorization_request_not_found");
             throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
         } else {
-            OAuth2AuthorizationRequest authorizationRequest = this.authorizationRequestRepository.removeAuthorizationRequest(request, response);
-            if (authorizationRequest == null) {
-                OAuth2Error oauth2Error = new OAuth2Error("authorization_request_not_found");
+            String registrationId = (String)authorizationRequest.getAttribute("registration_id");
+            ClientRegistration clientRegistration = this.clientRegistrationRepository.findByRegistrationId(registrationId);
+            if (clientRegistration == null) {
+                OAuth2Error oauth2Error = new OAuth2Error("client_registration_not_found", "Client Registration not found with Id: " + registrationId, (String)null);
                 throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
             } else {
-                String registrationId = (String)authorizationRequest.getAttribute("registration_id");
-                ClientRegistration clientRegistration = this.clientRegistrationRepository.findByRegistrationId(registrationId);
-                if (clientRegistration == null) {
-                    OAuth2Error oauth2Error = new OAuth2Error("client_registration_not_found", "Client Registration not found with Id: " + registrationId, (String)null);
-                    throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
-                } else {
-                    String redirectUri = UriComponentsBuilder.fromHttpUrl(UrlUtils.buildFullRequestUrl(request)).replaceQuery((String)null).build().toUriString();
-                    OAuth2AuthorizationResponse authorizationResponse = OAuth2AuthorizationResponseUtils.convert(params, redirectUri);
-                    Object authenticationDetails = this.authenticationDetailsSource.buildDetails(request);
-                    OAuth2LoginAuthenticationToken authenticationRequest = new OAuth2LoginAuthenticationToken(clientRegistration, new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse));
-                    authenticationRequest.setDetails(authenticationDetails);
-                    // 委托Provider认证，认证成功后，返回OAuth2LoginAuthenticationToken
-                    OAuth2LoginAuthenticationToken authenticationResult = (OAuth2LoginAuthenticationToken)this.getAuthenticationManager().authenticate(authenticationRequest);
-                    OAuth2AuthenticationToken oauth2Authentication = new OAuth2AuthenticationToken(authenticationResult.getPrincipal(), authenticationResult.getAuthorities(), authenticationResult.getClientRegistration().getRegistrationId());
-                    oauth2Authentication.setDetails(authenticationDetails);
-                    OAuth2AuthorizedClient authorizedClient = new OAuth2AuthorizedClient(authenticationResult.getClientRegistration(), oauth2Authentication.getName(), authenticationResult.getAccessToken(), authenticationResult.getRefreshToken());
-                    this.authorizedClientRepository.saveAuthorizedClient(authorizedClient, oauth2Authentication, request, response);
-                    return oauth2Authentication;
-                }
+                String redirectUri = UriComponentsBuilder.fromHttpUrl(UrlUtils.buildFullRequestUrl(request)).replaceQuery((String)null).build().toUriString();
+                OAuth2AuthorizationResponse authorizationResponse = OAuth2AuthorizationResponseUtils.convert(params, redirectUri);
+                Object authenticationDetails = this.authenticationDetailsSource.buildDetails(request);
+                OAuth2LoginAuthenticationToken authenticationRequest = new OAuth2LoginAuthenticationToken(clientRegistration, new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse));
+                authenticationRequest.setDetails(authenticationDetails);
+                // 委托Provider认证，认证成功后，返回OAuth2LoginAuthenticationToken
+                OAuth2LoginAuthenticationToken authenticationResult = (OAuth2LoginAuthenticationToken)this.getAuthenticationManager().authenticate(authenticationRequest);
+                OAuth2AuthenticationToken oauth2Authentication = new OAuth2AuthenticationToken(authenticationResult.getPrincipal(), authenticationResult.getAuthorities(), authenticationResult.getClientRegistration().getRegistrationId());
+                oauth2Authentication.setDetails(authenticationDetails);
+                OAuth2AuthorizedClient authorizedClient = new OAuth2AuthorizedClient(authenticationResult.getClientRegistration(), oauth2Authentication.getName(), authenticationResult.getAccessToken(), authenticationResult.getRefreshToken());
+                this.authorizedClientRepository.saveAuthorizedClient(authorizedClient, oauth2Authentication, request, response);
+                return oauth2Authentication;
             }
         }
     }
+}
 ```
 
 `OAuth2LoginAuthenticationFilter` 的作用很简单，就是响应授权服务器的回调地址（/login/oauth2/code/github），核心之处在于`OAuth2LoginAuthenticationProvider` 对 `OAuth2LoginAuthenticationToken` 的认证。
@@ -187,46 +187,46 @@ https://github.com/login/oauth/authorize?response_type=code&client_id=&redirect_
 `OAuth2LoginAuthenticationProvider.java`
 
 ```java
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2LoginAuthenticationToken loginAuthenticationToken = (OAuth2LoginAuthenticationToken)authentication;
-        if (loginAuthenticationToken.getAuthorizationExchange().getAuthorizationRequest().getScopes().contains("openid")) {
-            return null;
-        } else {
-            OAuth2AuthorizationCodeAuthenticationToken authorizationCodeAuthenticationToken;
-            try {
-                authorizationCodeAuthenticationToken = (OAuth2AuthorizationCodeAuthenticationToken)this.authorizationCodeAuthenticationProvider.authenticate(new OAuth2AuthorizationCodeAuthenticationToken(loginAuthenticationToken.getClientRegistration(), loginAuthenticationToken.getAuthorizationExchange()));
-            } catch (OAuth2AuthorizationException var9) {
-                OAuth2Error oauth2Error = var9.getError();
-                throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
-            }
-
-            OAuth2AccessToken accessToken = authorizationCodeAuthenticationToken.getAccessToken();
-            Map<String, Object> additionalParameters = authorizationCodeAuthenticationToken.getAdditionalParameters();
-            OAuth2User oauth2User = this.userService.loadUser(new OAuth2UserRequest(loginAuthenticationToken.getClientRegistration(), accessToken, additionalParameters));
-            Collection<? extends GrantedAuthority> mappedAuthorities = this.authoritiesMapper.mapAuthorities(oauth2User.getAuthorities());
-            OAuth2LoginAuthenticationToken authenticationResult = new OAuth2LoginAuthenticationToken(loginAuthenticationToken.getClientRegistration(), loginAuthenticationToken.getAuthorizationExchange(), oauth2User, mappedAuthorities, accessToken, authorizationCodeAuthenticationToken.getRefreshToken());
-            authenticationResult.setDetails(loginAuthenticationToken.getDetails());
-            return authenticationResult;
+public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    OAuth2LoginAuthenticationToken loginAuthenticationToken = (OAuth2LoginAuthenticationToken)authentication;
+    if (loginAuthenticationToken.getAuthorizationExchange().getAuthorizationRequest().getScopes().contains("openid")) {
+        return null;
+    } else {
+        OAuth2AuthorizationCodeAuthenticationToken authorizationCodeAuthenticationToken;
+        try {
+            authorizationCodeAuthenticationToken = (OAuth2AuthorizationCodeAuthenticationToken)this.authorizationCodeAuthenticationProvider.authenticate(new OAuth2AuthorizationCodeAuthenticationToken(loginAuthenticationToken.getClientRegistration(), loginAuthenticationToken.getAuthorizationExchange()));
+        } catch (OAuth2AuthorizationException var9) {
+            OAuth2Error oauth2Error = var9.getError();
+            throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
         }
+
+        OAuth2AccessToken accessToken = authorizationCodeAuthenticationToken.getAccessToken();
+        Map<String, Object> additionalParameters = authorizationCodeAuthenticationToken.getAdditionalParameters();
+        OAuth2User oauth2User = this.userService.loadUser(new OAuth2UserRequest(loginAuthenticationToken.getClientRegistration(), accessToken, additionalParameters));
+        Collection<? extends GrantedAuthority> mappedAuthorities = this.authoritiesMapper.mapAuthorities(oauth2User.getAuthorities());
+        OAuth2LoginAuthenticationToken authenticationResult = new OAuth2LoginAuthenticationToken(loginAuthenticationToken.getClientRegistration(), loginAuthenticationToken.getAuthorizationExchange(), oauth2User, mappedAuthorities, accessToken, authorizationCodeAuthenticationToken.getRefreshToken());
+        authenticationResult.setDetails(loginAuthenticationToken.getDetails());
+        return authenticationResult;
     }
+}
 ```
 
 `OAuth2LoginAuthenticationToken.java`
 
 ```java
-    public OAuth2LoginAuthenticationToken(ClientRegistration clientRegistration, OAuth2AuthorizationExchange authorizationExchange, OAuth2User principal, Collection<? extends GrantedAuthority> authorities, OAuth2AccessToken accessToken, @Nullable OAuth2RefreshToken refreshToken) {
-        super(authorities);
-        Assert.notNull(clientRegistration, "clientRegistration cannot be null");
-        Assert.notNull(authorizationExchange, "authorizationExchange cannot be null");
-        Assert.notNull(principal, "principal cannot be null");
-        Assert.notNull(accessToken, "accessToken cannot be null");
-        this.clientRegistration = clientRegistration;
-        this.authorizationExchange = authorizationExchange;
-        this.principal = principal;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.setAuthenticated(true);
-    }
+public OAuth2LoginAuthenticationToken(ClientRegistration clientRegistration, OAuth2AuthorizationExchange authorizationExchange, OAuth2User principal, Collection<? extends GrantedAuthority> authorities, OAuth2AccessToken accessToken, @Nullable OAuth2RefreshToken refreshToken) {
+    super(authorities);
+    Assert.notNull(clientRegistration, "clientRegistration cannot be null");
+    Assert.notNull(authorizationExchange, "authorizationExchange cannot be null");
+    Assert.notNull(principal, "principal cannot be null");
+    Assert.notNull(accessToken, "accessToken cannot be null");
+    this.clientRegistration = clientRegistration;
+    this.authorizationExchange = authorizationExchange;
+    this.principal = principal;
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
+    this.setAuthenticated(true);
+}
 ```
 `OAuth2LoginAuthenticationToken` 有principal accessToken refreshToken等信息
 

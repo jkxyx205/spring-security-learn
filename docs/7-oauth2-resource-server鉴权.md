@@ -37,22 +37,22 @@ spring:
 ## 配置类 `ResourceServerConfig.java`
 
 ```java
-	@EnableWebSecurity
-	public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity
+public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
 	
-	    @Override
-	    protected void configure(HttpSecurity http) throws Exception {
-	        http
-	            .authorizeRequests(a -> a
-	                    .antMatchers("/public", "/error", "/webjars/**").permitAll()
-	                    .antMatchers("/admin").hasAnyRole("admin")
-	                    .anyRequest().authenticated()
-	            )
-	            .oauth2ResourceServer()
-	            .jwt();
-	    }
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests(a -> a
+                    .antMatchers("/public", "/error", "/webjars/**").permitAll()
+                    .antMatchers("/admin").hasAnyRole("admin")
+                    .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer()
+            .jwt();
+    }
 	
-	}
+}
 ```
 * /public 是不需要认证就可以访问的
 * /admin 是需要admin角色才能访问的
@@ -62,83 +62,83 @@ spring:
 ## 工具类
 ### 生成私钥和公钥
 ```
-	@UtilityClass
-	@Slf4j
-	public class SecurityUtils {
+@UtilityClass
+@Slf4j
+public class SecurityUtils {
 	
-	    /**
-	     * 私钥
-	     */
-	    private static final RSAPrivateKey PRIVATE_KEY = RsaKeyConverters.pkcs8().convert(SecurityUtils.class.getResourceAsStream("/key.private"));
+    /**
+     * 私钥
+     */
+    private static final RSAPrivateKey PRIVATE_KEY = RsaKeyConverters.pkcs8().convert(SecurityUtils.class.getResourceAsStream("/key.private"));
 	
-	    /**
-	     * 公钥
-	     */
-	    private static final RSAPublicKey PUBLIC_KEY = RsaKeyConverters.x509().convert(SecurityUtils.class.getResourceAsStream("/key.public"));
+    /**
+     * 公钥
+     */
+    private static final RSAPublicKey PUBLIC_KEY = RsaKeyConverters.x509().convert(SecurityUtils.class.getResourceAsStream("/key.public"));
 	
 	
-	    /**
-	     * rsa算法加解密时的填充方式
-	     */
-	    private static final String RSA_PADDING = "RSA/ECB/PKCS1Padding";
+    /**
+     * rsa算法加解密时的填充方式
+     */
+    private static final String RSA_PADDING = "RSA/ECB/PKCS1Padding";
 	
-	    /**
-	     * 生成私钥和公钥
-	     */
-	    public static void keys() {
-	        try {
-	            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-	            keyPairGen.initialize(2048);
-	            KeyPair keyPair = keyPairGen.generateKeyPair();
-	            PrivateKey privateKey = keyPair.getPrivate();
-	            PublicKey publicKey = keyPair.getPublic();
-	            log.info("{}{}{}", "\n-----BEGIN PRIVATE KEY-----\n", Base64.getMimeEncoder().encodeToString(privateKey.getEncoded()), "\n-----END PRIVATE KEY-----");
-	            log.info("{}{}{}", "\n-----BEGIN PUBLIC KEY-----\n", Base64.getMimeEncoder().encodeToString(publicKey.getEncoded()), "\n-----END PUBLIC KEY-----");
-	        } catch (Exception e) {
-	            throw new IllegalStateException(e);
-	        }
-	    }
+    /**
+     * 生成私钥和公钥
+     */
+    public static void keys() {
+        try {
+            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+            keyPairGen.initialize(2048);
+            KeyPair keyPair = keyPairGen.generateKeyPair();
+            PrivateKey privateKey = keyPair.getPrivate();
+            PublicKey publicKey = keyPair.getPublic();
+            log.info("{}{}{}", "\n-----BEGIN PRIVATE KEY-----\n", Base64.getMimeEncoder().encodeToString(privateKey.getEncoded()), "\n-----END PRIVATE KEY-----");
+            log.info("{}{}{}", "\n-----BEGIN PUBLIC KEY-----\n", Base64.getMimeEncoder().encodeToString(publicKey.getEncoded()), "\n-----END PUBLIC KEY-----");
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 	
-	    /**
-	     * 加密
-	     *
-	     * @param plaintext 明文
-	     * @return 密文
-	     */
-	    private static String encrypt(String plaintext) {
-	        try {
-	            Cipher cipher = Cipher.getInstance(RSA_PADDING);
-	            cipher.init(Cipher.ENCRYPT_MODE, PUBLIC_KEY);
-	            String encrypt = Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes()));
-	            log.info("The plaintext {} is encrypted as: {}", plaintext, encrypt);
-	            return encrypt;
-	        } catch (Exception e) {
-	            throw new IllegalStateException(e);
-	        }
-	    }
+    /**
+     * 加密
+     *
+     * @param plaintext 明文
+     * @return 密文
+     */
+    private static String encrypt(String plaintext) {
+        try {
+            Cipher cipher = Cipher.getInstance(RSA_PADDING);
+            cipher.init(Cipher.ENCRYPT_MODE, PUBLIC_KEY);
+            String encrypt = Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes()));
+            log.info("The plaintext {} is encrypted as: {}", plaintext, encrypt);
+            return encrypt;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 	
-	    /**
-	     * 解密
-	     *
-	     * @param cipherText 密文
-	     * @return 明文
-	     */
-	    private static String decrypt(String cipherText) {
-	        try {
-	            Cipher cipher = Cipher.getInstance(RSA_PADDING);
-	            cipher.init(Cipher.DECRYPT_MODE, PRIVATE_KEY);
-	            String decrypt = new String(cipher.doFinal(Base64.getDecoder().decode(cipherText)));
-	            log.info("The ciphertext {} is decrypted as: {}", cipherText, decrypt);
-	            return decrypt;
-	        } catch (Exception e) {
-	            throw new IllegalStateException(e);
-	        }
-	    }
+    /**
+     * 解密
+     *
+     * @param cipherText 密文
+     * @return 明文
+     */
+    private static String decrypt(String cipherText) {
+        try {
+            Cipher cipher = Cipher.getInstance(RSA_PADDING);
+            cipher.init(Cipher.DECRYPT_MODE, PRIVATE_KEY);
+            String decrypt = new String(cipher.doFinal(Base64.getDecoder().decode(cipherText)));
+            log.info("The ciphertext {} is decrypted as: {}", cipherText, decrypt);
+            return decrypt;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 	
-	    public static void main(String[] args) {
-	        keys();
-	    }
-	}
+    public static void main(String[] args) {
+        keys();
+    }
+}
 ```
 将文件 `key.private` 和 `key.public` 放到`resources`目录下
 ### 生成token
@@ -226,22 +226,22 @@ curl -X GET \
 如果通过参数传递token，需要修改
 
 ```java
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
-        // 允许参数access_token
-        resolver.setAllowUriQueryParameter(true);
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+    DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
+    // 允许参数access_token
+    resolver.setAllowUriQueryParameter(true);
 
-        http
-            .authorizeRequests(a -> a
-                    .antMatchers("/public", "/error", "/webjars/**").permitAll()
-                    .antMatchers("/admin").hasAnyRole("admin")
-                    .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer()
-                .bearerTokenResolver(resolver)
-            .jwt();
-    }
+    http
+        .authorizeRequests(a -> a
+                .antMatchers("/public", "/error", "/webjars/**").permitAll()
+                .antMatchers("/admin").hasAnyRole("admin")
+                .anyRequest().authenticated()
+        )
+        .oauth2ResourceServer()
+            .bearerTokenResolver(resolver)
+        .jwt();
+}
 ```
 利用浏览器进行测试，将token放到参数access_token中
 
@@ -258,7 +258,7 @@ curl -X GET \
 * **底层解析token：** 由	`NimbusJwtDecoder` 进行decode；如果是 `SignedJWT` 使用公钥(yml中配置的公钥，项目启动的时候就会读取公钥信息)验签；验证成功后token验证由 `DelegatingOAuth2TokenValidator` 代理去进行其他验证。`JwtTimestampValidator` 验证日期是否过期。
 
 `OAuth2ResourceServerJwtConfiguration.java`
- 
+
 参考阅读：
 
 * [https://www.zyc.red/Spring/Security/OAuth2/OAuth2-Resource-Server/](https://www.zyc.red/Spring/Security/OAuth2/OAuth2-Resource-Server/)
