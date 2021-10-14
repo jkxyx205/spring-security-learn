@@ -169,3 +169,4 @@ gradle-app.setting
 application-prod.yml
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,jetbrains+iml,java,gradle
+target/
