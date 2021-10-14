@@ -1,6 +1,10 @@
 package com.rick.security.oauth2.api;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.jwt.Jwt;
+import org.springframework.security.jwt.JwtHelper;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -13,5 +17,12 @@ public class IndexController {
     @GetMapping
     public String index() {
         return "index";
+    }
+
+    @GetMapping("admin")
+    public String admin(Authentication authentication, @RequestParam("access_token") String accessToken) {
+        // 解析token
+        Jwt jwt = JwtHelper.decode(accessToken);
+        return jwt.getClaims();
     }
 }
