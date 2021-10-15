@@ -30,6 +30,7 @@ public class ResourceServer extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         ((ExpressionUrlAuthorizationConfigurer.AuthorizedUrl)http.authorizeRequests()
+                .antMatchers("/**").access("#oauth2.hasScope('all')")
                 .antMatchers("/admin").hasRole("ADMIN")
                 .anyRequest()).authenticated();
 
