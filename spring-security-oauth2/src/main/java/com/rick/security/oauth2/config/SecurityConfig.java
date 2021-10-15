@@ -93,7 +93,7 @@ public class SecurityConfig {
         //Admin Role
         UserDetails theUser = User.withUsername("rick")
                 .password(passwordEncoder.encode("123456"))
-                .roles("ADMIN").build();
+                .roles("ADMIN", "p1").build();
         //User Role
         UserDetails theManager = User.withUsername("john")
                 .password(passwordEncoder.encode("123456"))
