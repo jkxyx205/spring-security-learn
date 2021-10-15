@@ -25,7 +25,7 @@ import java.util.*;
  * @createdAt 2021-10-14 20:41:00
  */
 @Configuration
-public class SecurityConfig {
+public class TokenConfig {
 
     private String SIGNING_KEY = "uaa123";
 
@@ -64,21 +64,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
-        List<AuthenticationProvider> providers = new ArrayList<>();
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService(passwordEncoder));
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
-        providers.add(daoAuthenticationProvider);
-        return new ProviderManager(providers);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
-    }
-
-    @Bean
     public TokenEnhancer tokenEnhancer() {
         return (oAuth2AccessToken, oAuth2Authentication) -> {
             Map<String, Object> info = new HashMap<>();
@@ -88,19 +73,4 @@ public class SecurityConfig {
         };
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        //Admin Role
-        UserDetails theUser = User.withUsername("rick")
-                .password(passwordEncoder.encode("123456"))
-                .roles("ADMIN", "p1").build();
-        //User Role
-        UserDetails theManager = User.withUsername("john")
-                .password(passwordEncoder.encode("123456"))
-                .roles("USER").build();
-        InMemoryUserDetailsManager userDetailsManager = new InMemoryUserDetailsManager();
-        userDetailsManager.createUser(theUser);
-        userDetailsManager.createUser(theManager);
-        return userDetailsManager;
-    }
 }
