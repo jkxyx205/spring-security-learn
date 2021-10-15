@@ -42,7 +42,7 @@ public class TokenGenerator {
     private static final String ACCESS_TO_REFRESH = "access_to_refresh:";
 
     /**
-     * 表单验证完成后创建token
+     * 认证完成后创建token
      * @param authentication
      * @return
      */
