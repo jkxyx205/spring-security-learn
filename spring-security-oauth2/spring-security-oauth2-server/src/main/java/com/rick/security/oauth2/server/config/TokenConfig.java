@@ -50,7 +50,7 @@ public class TokenConfig {
         service.setTokenEnhancer(tokenEnhancerChain);
 
         service.setReuseRefreshToken(false); // 只对"存储"的有效，jwt_stoken无效
-        service.setAccessTokenValiditySeconds(60); // 令牌默认有效期2小时
+        service.setAccessTokenValiditySeconds(60 * 60 * 2); // 令牌默认有效期2小时
         service.setRefreshTokenValiditySeconds(259200); // 刷新令牌默认有效期3天
         return service;
     }

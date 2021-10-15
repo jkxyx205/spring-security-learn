@@ -1,7 +1,6 @@
 package com.rick.security.oauth2.resource.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
@@ -10,7 +9,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
  * @author Rick
  * @createdAt 2021-10-14 20:41:00
  */
-@Configuration
+//@Configuration
 public class TokenConfig {
 
     private String SIGNING_KEY = "uaa123";

@@ -1,2 +1,13 @@
 server:
   port: 8082
+
+security:
+  oauth2:
+    client:
+      client-id: c
+      client-secret: 123456
+      access-token-uri: http://localhost:8081/oauth/token
+      user-authorization-uri: http://localhost:8081/oauth/authorize
+    resource:
+      # 远程 RemoteTokenServices
+      token-info-uri: http://localhost:8081/oauth/check_token
