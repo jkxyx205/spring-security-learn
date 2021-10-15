@@ -2,11 +2,13 @@ package com.rick.security.oauth2.server.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.*;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,11 +23,16 @@ public class TokenConfig {
 
     private String SIGNING_KEY = "uaa123";
 
+//    @Bean
+//    public TokenStore tokenStore() {
+//        //使用内存存储令牌（普通令牌）
+////        return new InMemoryTokenStore();
+//        return new JwtTokenStore(accessTokenConverter());
+//    }
+
     @Bean
-    public TokenStore tokenStore() {
-        //使用内存存储令牌（普通令牌）
-//        return new InMemoryTokenStore();
-        return new JwtTokenStore(accessTokenConverter());
+    public TokenStore tokenStore(RedisConnectionFactory redisConnectionFactory) {
+        return new RedisTokenStore(redisConnectionFactory);
     }
 
     @Bean
@@ -50,7 +57,7 @@ public class TokenConfig {
         service.setTokenEnhancer(tokenEnhancerChain);
 
         service.setReuseRefreshToken(false); // 只对"存储"的有效，jwt_stoken无效
-        service.setAccessTokenValiditySeconds(60 * 60 * 2); // 令牌默认有效期2小时
+        service.setAccessTokenValiditySeconds(60); // 令牌默认有效期2小时
         service.setRefreshTokenValiditySeconds(259200); // 刷新令牌默认有效期3天
         return service;
     }
