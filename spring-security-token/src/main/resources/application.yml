@@ -1,0 +1,6 @@
+spring:
+  security:
+    user:
+      name: rick
+      password: 123456
+      roles: ADMIN
